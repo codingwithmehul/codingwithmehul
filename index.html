@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="sidebar">
+            <h2>Online Users</h2>
+            <ul id="users-list"></ul>
+        </div>
+        <div class="chat-box">
+            <div id="messages"></div>
+            <input type="text" id="message-input" placeholder="Type a message...">
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <script>
+        var socket = io();
+
+        socket.on('connect', function() {
+            console.log("Connected to server");
+        });
+
+        socket.on('message', function(msg) {
+            var messageDiv = document.createElement('div');
+            messageDiv.classList.add('message');
+            messageDiv.innerText = msg;
+            document.getElementById('messages').appendChild(messageDiv);
+        });
+
+        socket.on('update_users', function(users) {
+            var userList = document.getElementById('users-list');
+            userList.innerHTML = "";
+            users.forEach(function(user) {
+                var li = document.createElement('li');
+                li.innerText = "User " + user;
+                userList.appendChild(li);
+            });
+        });
+
+        function sendMessage() {
+            var input = document.getElementById('message-input');
+            var message = input.value;
+            socket.send(message);
+            input.value = "";
+        }
+    </script>
+</body>
+</html>
